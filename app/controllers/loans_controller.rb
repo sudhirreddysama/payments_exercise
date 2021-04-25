@@ -5,10 +5,19 @@ class LoansController < ActionController::API
   end
 
   def index
-    render json: Loan.all
+  	loans = []
+  	Loan.all.each do |loan|
+  		payments = loan.payments
+  		balance = loan.funded_amount - payments.sum(:paid_amount)
+  		loans << {id: loan.id, funded_amount: loan.funded_amount, outstanding_balance: balance, payments: payments}
+  	end
+    render json: loans
   end
 
   def show
-    render json: Loan.find(params[:id])
+  	loan = Loan.find(params[:id])
+  	payments = loan.payments
+  	balance = loan.funded_amount - payments.sum(:paid_amount)
+    render json: {id: loan.id, funded_amount: loan.funded_amount, outstanding_balance: balance, payments: payments}
   end
 end
